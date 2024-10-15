@@ -70,7 +70,6 @@ const unsigned char* num_mask_allArray[10] = {
     num_9_mask
 };
 
-
 bool isDaytime = true;
 bool isLand = true;
 
@@ -178,6 +177,7 @@ void WatchySkykid::drawSeg(const int& num, int index_x, int index_y, bool one_le
             index_x += 5; // right side
         }
     }
+
     display.drawBitmap(INDEX_SIZE * index_x, INDEX_SIZE * index_y, num_allArray[num], INDEX_SIZE * disp_size_x, INDEX_SIZE * 12, isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
 
     if (isDaytime) {
@@ -229,7 +229,6 @@ void WatchySkykid::drawAirEnemy()
 
     display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[0]][0], INDEX_SIZE * air_enemy_indexs[choiced[0]][1], air_enemy, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
     display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[1]][0], INDEX_SIZE * air_enemy_indexs[choiced[1]][1], air_enemy, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
-
 }
 
 const int land_enemy_indexs[4][2] = {
@@ -293,9 +292,6 @@ void WatchySkykid::drawLandEnemy()
 
 }
 
-
-
-
 void WatchySkykid::drawTarget()
 {
 #ifdef WATCHY_SIM
@@ -313,9 +309,6 @@ void WatchySkykid::drawTarget()
         display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, sea_target_mask[choice], INDEX_SIZE * 16, INDEX_SIZE * 8, GxEPD_BLACK);
         display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, sea_target[choice], INDEX_SIZE * 16, INDEX_SIZE * 8, GxEPD_WHITE);
     }
-
-
-
 }
 
 void WatchySkykid::drawBattery(){
@@ -338,7 +331,7 @@ void WatchySkykid::drawBattery(){
         if (isDaytime) {
             display.drawBitmap(INDEX_SIZE * 46 - INDEX_SIZE * 4 * batterySegments, INDEX_SIZE * 0, player_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); //mask
         }
-            display.drawBitmap(INDEX_SIZE * 46 - INDEX_SIZE * 4 *batterySegments, INDEX_SIZE * 0, player, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); //player
+        display.drawBitmap(INDEX_SIZE * 46 - INDEX_SIZE * 4 *batterySegments, INDEX_SIZE * 0, player, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); //player
 
     }
 }
@@ -400,5 +393,4 @@ void WatchySkykid::drawBomb(const int &playerLocate) {
     default:
         break;
     }
-
 }
