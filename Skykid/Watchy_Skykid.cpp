@@ -1,80 +1,11 @@
 #include "Watchy_Skykid.h"
-
+#include "Skykid.h"
 #include "FreeSansBold6pt7b.h"
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 544)
-const unsigned char* sea_target[2] = {
-    bb,
-    cv
-};
-const unsigned char* sea_target_mask[2] = {
-    bb_mask,
-    cv_mask
-};
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 544)
-const unsigned char* land_target[2] = {
-    enemy_base,
-    enemy_factory
-};
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
-const unsigned char* land_enemy[2] = {
-    land_enemy1,
-    land_enemy2
-};
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
-const unsigned char* land_enemy_mask[2] = {
-    land_enemy1_mask,
-    land_enemy2_mask
-};
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
-const unsigned char* sea_enemy[2] = {
-    sea_enemy1,
-    sea_enemy2
-};
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
-const unsigned char* sea_enemy_mask[2] = {
-    sea_enemy1_mask,
-    sea_enemy2_mask
-};
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 2464)
-const unsigned char* num_allArray[10] = {
-    num_0,
-    num_1,
-    num_2,
-    num_3,
-    num_4,
-    num_5,
-    num_6,
-    num_7,
-    num_8,
-    num_9
-};
-
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 2560)
-const unsigned char* num_mask_allArray[10] = {
-    num_0_mask,
-    num_1_mask,
-    num_2_mask,
-    num_3_mask,
-    num_4_mask,
-    num_5_mask,
-    num_6_mask,
-    num_7_mask,
-    num_8_mask,
-    num_9_mask
-};
 
 bool isDaytime = true;
 bool isLand = true;
 
 void WatchySkykid::drawWatchFace(){
-
     if (currentTime.Hour < 6 || currentTime.Hour >= 18) {
         isDaytime = false;
     }
@@ -83,13 +14,13 @@ void WatchySkykid::drawWatchFace(){
     }
 
 #ifdef WATCHY_SIM
-    srand(currentTime.Hour + currentTime.Minute);
-    int isLandNum = rand() % 2;
+    srand(currentTime.Hour + currentTime.Minute + currentTime.Wday+ 37);
+    int randNum = rand() % 10;
 #else
-    randomSeed(currentTime.Hour + currentTime.Minute);
-    int isLandNum = random(2);
+    randomSeed(currentTime.Hour + currentTime.Minute + currentTime.Wday + 37);
+    int randNum = random(10);
 #endif
-    if (isLandNum == 0) {
+    if (randNum % 2 == 0) {
         isLand = false;
     }
     else {
@@ -123,6 +54,24 @@ void WatchySkykid::drawWatchFace(){
 
     //Date
     drawDate();
+
+    // Player
+    int playerLocate = 0;
+    if(randNum<3){
+      playerLocate = 0;
+    }else if (randNum<6){
+      playerLocate = 1;
+    }else{
+      playerLocate = 2;
+    }
+    if (isDaytime) {
+        display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 20, player_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
+    }
+    display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 20, player, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
+
+    // bomb
+    drawBomb(playerLocate);
+
 }
 
 void WatchySkykid::drawBackground() {
@@ -144,45 +93,8 @@ void WatchySkykid::drawBackground() {
     // target
     drawTarget();
 
-    // Player
-#ifdef WATCHY_SIM
-    srand(currentTime.Hour + currentTime.Minute + 37);
-    int playerLocate = rand() % 3;
-#else
-    randomSeed(currentTime.Hour + currentTime.Minute + 37);
-    int playerLocate = random(3);
-#endif
-
-    if (isDaytime) {
-        display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 20, player_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
-    }
-    display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 20, player, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
-
     // Vinus
     display.drawBitmap(INDEX_SIZE * 40, INDEX_SIZE * 30, vinus1, INDEX_SIZE * 8, INDEX_SIZE * 16, isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
-
-    // bomb
-    drawBomb(playerLocate);
-}
-
-void WatchySkykid::drawSeg(const int& num, int index_x, int index_y, bool one_left)
-{
-    int disp_size_x = 10;
-    if (num == 1) {
-        disp_size_x = 5;
-        if (one_left) {
-            index_x += 0; // left side
-        }
-        else {
-            index_x += 5; // right side
-        }
-    }
-
-    display.drawBitmap(INDEX_SIZE * index_x, INDEX_SIZE * index_y, num_allArray[num], INDEX_SIZE * disp_size_x, INDEX_SIZE * 12, isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
-
-    if (isDaytime) {
-        display.drawBitmap(INDEX_SIZE * index_x, INDEX_SIZE * index_y, num_mask_allArray[num], INDEX_SIZE * disp_size_x, INDEX_SIZE * 12, GxEPD_WHITE);
-    }
 }
 
 const int air_enemy_indexs[4][2] = {
@@ -194,12 +106,6 @@ const int air_enemy_indexs[4][2] = {
 
 void WatchySkykid::drawAirEnemy()
 {
-#ifdef WATCHY_SIM
-  srand(currentTime.Hour + currentTime.Minute + 11);
-#else
-  randomSeed(currentTime.Hour + currentTime.Minute + 11);
-#endif
-
     int choiced[2] = { -1, -1 };
     int randMax = 4;
     for (int cnt = 0; cnt < 2; ) {
@@ -237,14 +143,9 @@ const int land_enemy_indexs[4][2] = {
     {30,42},
     {35,42}
 };
+
 void WatchySkykid::drawLandEnemy()
 {
-#ifdef WATCHY_SIM
-    srand(currentTime.Hour + currentTime.Minute + 23);
-#else
-    randomSeed(currentTime.Hour + currentTime.Minute + 23);
-#endif
-
     int choiced[2] = { -1, -1 };
     int randMax = 4;
     for (int cnt = 0; cnt < 2; ) {
@@ -289,16 +190,13 @@ void WatchySkykid::drawLandEnemy()
         display.drawBitmap(INDEX_SIZE * land_enemy_indexs[choiced[0]][0], INDEX_SIZE * land_enemy_indexs[choiced[0]][1], sea_enemy[choicedEnemy[0]], INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
         display.drawBitmap(INDEX_SIZE * land_enemy_indexs[choiced[1]][0], INDEX_SIZE * land_enemy_indexs[choiced[1]][1], sea_enemy[choicedEnemy[1]], INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
     }
-
 }
 
 void WatchySkykid::drawTarget()
 {
 #ifdef WATCHY_SIM
-    srand(currentTime.Hour + currentTime.Minute + 31);
     int choice = rand() % 2;
 #else
-    randomSeed(currentTime.Hour + currentTime.Minute + 31);
     int choice = random(2);
 #endif
     if (isLand) {
@@ -309,6 +207,23 @@ void WatchySkykid::drawTarget()
         display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, sea_target_mask[choice], INDEX_SIZE * 16, INDEX_SIZE * 8, GxEPD_BLACK);
         display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, sea_target[choice], INDEX_SIZE * 16, INDEX_SIZE * 8, GxEPD_WHITE);
     }
+}
+
+void WatchySkykid::drawDate() {
+    display.setTextColor(isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
+    display.setFont(&FreeSansBold6pt7b);
+
+    String score = "BARON ";
+    if (currentTime.Month < 10) {
+        score += " ";
+    }
+    score += currentTime.Month;
+    if (currentTime.Day < 10) {
+        score += "0";
+    }
+    score += currentTime.Day;
+    display.setCursor(INDEX_SIZE * 19, INDEX_SIZE * 3);
+    display.print(score);
 }
 
 void WatchySkykid::drawBattery(){
@@ -336,21 +251,24 @@ void WatchySkykid::drawBattery(){
     }
 }
 
-void WatchySkykid::drawDate() {
-    display.setTextColor(isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
-    display.setFont(&FreeSansBold6pt7b);
+void WatchySkykid::drawSeg(const int& num, int index_x, int index_y, bool one_left)
+{
+    int disp_size_x = 10;
+    if (num == 1) {
+        disp_size_x = 5;
+        if (one_left) {
+            index_x += 0; // left side
+        }
+        else {
+            index_x += 5; // right side
+        }
+    }
 
-    String score = "BARON ";
-    if (currentTime.Month < 10) {
-        score += " ";
+    display.drawBitmap(INDEX_SIZE * index_x, INDEX_SIZE * index_y, num_allArray[num], INDEX_SIZE * disp_size_x, INDEX_SIZE * 12, isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
+
+    if (isDaytime) {
+        display.drawBitmap(INDEX_SIZE * index_x, INDEX_SIZE * index_y, num_mask_allArray[num], INDEX_SIZE * disp_size_x, INDEX_SIZE * 12, GxEPD_WHITE);
     }
-    score += currentTime.Month;
-    if (currentTime.Day < 10) {
-        score += "0";
-    }
-    score += currentTime.Day;
-    display.setCursor(INDEX_SIZE * 19, INDEX_SIZE * 3);
-    display.print(score);
 }
 
 void WatchySkykid::drawBomb(const int &playerLocate) {
@@ -359,10 +277,22 @@ void WatchySkykid::drawBomb(const int &playerLocate) {
         {4,29},
         {4,33},
     };
-
+#ifdef WATCHY_SIM
     for (int cnt = 0; cnt < 3; cnt++) {
         display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // draw
+        Sleep(500);
+        display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_WHITE : GxEPD_BLACK); // erase
     }
+#else
+    display.display(true);
+    for (int cnt = 0; cnt < 3; cnt++) {
+        display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // draw
+        display.display(true);
+        delay(200);
+        display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_WHITE : GxEPD_BLACK); // erase
+        display.display(true);
+    }
+#endif
 
     switch (playerLocate) {
     case 0:

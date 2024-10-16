@@ -1,3 +1,6 @@
+#ifndef SKYKID_H
+#define SKYKID_H
+
 // 'title', 76x16px
 const unsigned char title[] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x03, 0xc6, 0x30, 0x30, 0x90, 0x70,
@@ -758,3 +761,73 @@ const unsigned char medal_mask[] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x7f, 0xfc, 0x06, 0xc0,
 	0x09, 0x20, 0x15, 0x50, 0x12, 0x90, 0x2c, 0x68, 0x12, 0x90, 0x15, 0x50, 0x09, 0x20, 0x06, 0xc0
 };
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 544)
+const unsigned char* sea_target[2] = {
+    bb,
+    cv
+};
+const unsigned char* sea_target_mask[2] = {
+    bb_mask,
+    cv_mask
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 544)
+const unsigned char* land_target[2] = {
+    enemy_base,
+    enemy_factory
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
+const unsigned char* land_enemy[2] = {
+    land_enemy1,
+    land_enemy2
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
+const unsigned char* land_enemy_mask[2] = {
+    land_enemy1_mask,
+    land_enemy2_mask
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
+const unsigned char* sea_enemy[2] = {
+    sea_enemy1,
+    sea_enemy2
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 96)
+const unsigned char* sea_enemy_mask[2] = {
+    sea_enemy1_mask,
+    sea_enemy2_mask
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 2464)
+const unsigned char* num_allArray[10] = {
+    num_0,
+    num_1,
+    num_2,
+    num_3,
+    num_4,
+    num_5,
+    num_6,
+    num_7,
+    num_8,
+    num_9
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 2560)
+const unsigned char* num_mask_allArray[10] = {
+    num_0_mask,
+    num_1_mask,
+    num_2_mask,
+    num_3_mask,
+    num_4_mask,
+    num_5_mask,
+    num_6_mask,
+    num_7_mask,
+    num_8_mask,
+    num_9_mask
+};
+
+#endif
