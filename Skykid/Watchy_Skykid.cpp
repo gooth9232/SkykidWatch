@@ -65,9 +65,9 @@ void WatchySkykid::drawWatchFace(){
       playerLocate = 2;
     }
     if (isDaytime) {
-        display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 20, player_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
+        display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 21, player_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
     }
-    display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 20, player, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
+    display.drawBitmap(INDEX_SIZE * (3 + 5 * playerLocate), INDEX_SIZE * 21, player, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
 
     // bomb
     drawBomb(playerLocate);
@@ -97,44 +97,47 @@ void WatchySkykid::drawBackground() {
     display.drawBitmap(INDEX_SIZE * 40, INDEX_SIZE * 30, vinus1, INDEX_SIZE * 8, INDEX_SIZE * 16, isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
 }
 
-const int air_enemy_indexs[4][2] = {
-    {18,24},
+const int air_enemy_indexs[6][2] = {
+    {18,26},
+    {24,23},
     {27,33},
-    {36,22},
-    {42,18},
+    {33,30},
+    {35,22},
+    {42,18}
 };
 
 void WatchySkykid::drawAirEnemy()
 {
-    int choiced[2] = { -1, -1 };
-    int randMax = 4;
-    for (int cnt = 0; cnt < 2; ) {
+    int randMax = 6;
+    const int enemyNum = 3;
+    int choiced[enemyNum] = { -1, -1, -1 };
+
+    for (int cnt = 0; cnt < enemyNum; ) {
 #ifdef WATCHY_SIM
         int choice = rand()% randMax;
 #else
         int choice = random(randMax);
 #endif
         int cnt2 = 0;
-        for (; cnt2 < 2; cnt2++) {
+        for (; cnt2 < enemyNum; cnt2++) {
             if (choiced[cnt2] == choice) {
                 break;
             }
         }
-        if (cnt2 != 2) {
+        if (cnt2 != enemyNum) {
             continue;
         }
         choiced[cnt] = choice;
-
         cnt++;
     }
 
-    if (!isDaytime) {
-        display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[0]][0], INDEX_SIZE * air_enemy_indexs[choiced[0]][1], air_enemy_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
-        display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[1]][0], INDEX_SIZE * air_enemy_indexs[choiced[1]][1], air_enemy_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
-    }
+    for (int cnt = 0; cnt < enemyNum; cnt++) {
+        if (!isDaytime) {
+            display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[cnt]][0], INDEX_SIZE * air_enemy_indexs[choiced[cnt]][1], air_enemy_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE);
+        }
 
-    display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[0]][0], INDEX_SIZE * air_enemy_indexs[choiced[0]][1], air_enemy, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
-    display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[1]][0], INDEX_SIZE * air_enemy_indexs[choiced[1]][1], air_enemy, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
+        display.drawBitmap(INDEX_SIZE * air_enemy_indexs[choiced[cnt]][0], INDEX_SIZE * air_enemy_indexs[choiced[cnt]][1], air_enemy, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK);
+    }
 }
 
 const int land_enemy_indexs[4][2] = {
@@ -195,12 +198,12 @@ void WatchySkykid::drawLandEnemy()
 void WatchySkykid::drawTarget()
 {
 #ifdef WATCHY_SIM
-    int choice = rand() % 2;
+    int choice = rand() % 3;
 #else
-    int choice = random(2);
+    int choice = random(3);
 #endif
     if (isLand) {
-        display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, land_mask, INDEX_SIZE * 16, INDEX_SIZE * 8, isDaytime ? GxEPD_WHITE : GxEPD_BLACK);
+        display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, land_target_mask[choice], INDEX_SIZE * 16, INDEX_SIZE * 8, isDaytime ? GxEPD_WHITE : GxEPD_BLACK);
         display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, land_target[choice], INDEX_SIZE * 16, INDEX_SIZE * 8, isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
     }
     else {
@@ -277,37 +280,60 @@ void WatchySkykid::drawBomb(const int &playerLocate) {
         {4,29},
         {4,33},
     };
+
 #ifdef WATCHY_SIM
     for (int cnt = 0; cnt < 3; cnt++) {
-        display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // draw
+        display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // bomb draw
+        drawBullet(cnt, true);
         Sleep(500);
         display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_WHITE : GxEPD_BLACK); // erase
+        drawBullet(cnt, false);
     }
 #else
     display.display(true);
     for (int cnt = 0; cnt < 3; cnt++) {
         display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // draw
+        drawBullet(cnt, true);
         display.display(true);
         delay(200);
         display.drawBitmap(INDEX_SIZE * (bomb_indexs[cnt][0] + playerLocate * 5), INDEX_SIZE * bomb_indexs[cnt][1], bomb, INDEX_SIZE * 2, INDEX_SIZE * 4, isDaytime ? GxEPD_WHITE : GxEPD_BLACK); // erase
+        drawBullet(cnt, false);
         display.display(true);
     }
 #endif
 
     switch (playerLocate) {
     case 0:
-        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 37, five_hundred_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
-        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 37, five_hundred, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // 500
-        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 41, exporde_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
-        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 41, exporde, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // exporde
+        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 40, exporde_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
+        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 40, exporde, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // exporde
+#ifdef WATCHY_SIM
+        Sleep(200);
+#else
+        display.display(true);
+        delay(200);
+#endif
+        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 35, five_hundred_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
+        display.drawBitmap(INDEX_SIZE * 3, INDEX_SIZE * 35, five_hundred, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // 500
         break;
     case 1:
-        display.drawBitmap(INDEX_SIZE * 12, INDEX_SIZE * 18, medal_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
-        display.drawBitmap(INDEX_SIZE * 12, INDEX_SIZE * 18, medal, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // medal
-        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 37, thousand_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
-        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 37, thousand, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // 1000
-        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 41, exporde_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
-        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 41, exporde, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // exporde
+        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 40, exporde_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
+        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 40, exporde, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // exporde
+#ifdef WATCHY_SIM
+        Sleep(200);
+#else
+        display.display(true);
+        delay(200);
+#endif
+        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 35, thousand_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
+        display.drawBitmap(INDEX_SIZE * 8, INDEX_SIZE * 35, thousand, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // 1000
+#ifdef WATCHY_SIM
+        Sleep(200);
+#else
+        display.display(true);
+        delay(200);
+#endif
+        display.drawBitmap(INDEX_SIZE * 12, INDEX_SIZE * 32, medal_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
+        display.drawBitmap(INDEX_SIZE * 12, INDEX_SIZE * 32, medal, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // medal
 
         // Vinus
         display.drawBitmap(INDEX_SIZE * 40, INDEX_SIZE * 30, vinus1, INDEX_SIZE * 8, INDEX_SIZE * 16, isDaytime ? GxEPD_WHITE : GxEPD_BLACK);
@@ -315,12 +341,51 @@ void WatchySkykid::drawBomb(const int &playerLocate) {
 
         break;
     case 2:
-        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 37, five_hundred_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
-        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 37, five_hundred, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // 500
-        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 41, exporde_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
-        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 41, exporde, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // exporde
+        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 40, exporde_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
+        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 40, exporde, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // exporde
+#ifdef WATCHY_SIM
+        Sleep(200);
+#else
+        display.display(true);
+        delay(200);
+#endif
+        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 35, five_hundred_mask, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_WHITE); // mask
+        display.drawBitmap(INDEX_SIZE * 13, INDEX_SIZE * 35, five_hundred, INDEX_SIZE * 4, INDEX_SIZE * 4, GxEPD_BLACK); // 500
         break;
     default:
         break;
     }
+}
+
+void WatchySkykid::drawBullet(const int& seedNum, const bool& draw)
+{
+    const int bullet_indexs[3][3][2] = {
+        {
+        {19,36},    // 3
+        {22,31},    // 6
+        {17,31},    // 2
+        },
+        {
+        {19,36},    // 3
+        {24,34},    // 4
+        {26,28},    // 7
+        },
+        {
+        {30,29},    // 5
+        {21,23},    // 8
+        {17,31},    // 2
+        },
+    };
+
+    if(draw){
+        display.drawBitmap(INDEX_SIZE * bullet_indexs[seedNum][0][0], INDEX_SIZE * bullet_indexs[seedNum][0][1], bullet, INDEX_SIZE * 2, INDEX_SIZE * 2, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // draw
+        display.drawBitmap(INDEX_SIZE * bullet_indexs[seedNum][1][0], INDEX_SIZE * bullet_indexs[seedNum][1][1], bullet, INDEX_SIZE * 2, INDEX_SIZE * 2, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // draw
+        display.drawBitmap(INDEX_SIZE * bullet_indexs[seedNum][2][0], INDEX_SIZE * bullet_indexs[seedNum][2][1], bullet, INDEX_SIZE * 2, INDEX_SIZE * 2, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); // draw
+    }
+    else {
+        display.drawBitmap(INDEX_SIZE * bullet_indexs[seedNum][0][0], INDEX_SIZE * bullet_indexs[seedNum][0][1], bullet, INDEX_SIZE * 2, INDEX_SIZE * 2, isDaytime ? GxEPD_WHITE : GxEPD_BLACK); // erase
+        display.drawBitmap(INDEX_SIZE * bullet_indexs[seedNum][1][0], INDEX_SIZE * bullet_indexs[seedNum][1][1], bullet, INDEX_SIZE * 2, INDEX_SIZE * 2, isDaytime ? GxEPD_WHITE : GxEPD_BLACK); // erase
+        display.drawBitmap(INDEX_SIZE * bullet_indexs[seedNum][2][0], INDEX_SIZE * bullet_indexs[seedNum][2][1], bullet, INDEX_SIZE * 2, INDEX_SIZE * 2, isDaytime ? GxEPD_WHITE : GxEPD_BLACK); // erase
+    }
+
 }

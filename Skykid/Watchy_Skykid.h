@@ -22,6 +22,7 @@ class WatchySkykid : public Watchy{
         void drawBattery();
         void drawSeg(const int& num, int index_x, int index_y, bool one_left = false);
         void drawBomb(const int& playerLocate);
+        void drawBullet(const int& seedNum, const bool& draw);
 };
 
 #endif
