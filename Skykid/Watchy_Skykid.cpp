@@ -5,6 +5,12 @@
 bool isDaytime = true;
 bool isLand = true;
 
+#ifdef WATCHY_SIM
+bool NTP_SYNC;
+#else
+RTC_DATA_ATTR bool NTP_SYNC;
+#endif
+
 void WatchySkykid::drawWatchFace(){
     if (currentTime.Hour < 6 || currentTime.Hour >= 18) {
         isDaytime = false;
@@ -95,6 +101,9 @@ void WatchySkykid::drawBackground() {
 
     // Vinus
     display.drawBitmap(INDEX_SIZE * 40, INDEX_SIZE * 30, vinus1, INDEX_SIZE * 8, INDEX_SIZE * 16, isDaytime ? GxEPD_BLACK : GxEPD_WHITE);
+
+    // NTP
+    drawFire();
 }
 
 const int air_enemy_indexs[6][2] = {
@@ -211,6 +220,31 @@ void WatchySkykid::drawTarget()
         display.drawBitmap(INDEX_SIZE * 2, INDEX_SIZE * 38, sea_target[choice], INDEX_SIZE * 16, INDEX_SIZE * 8, GxEPD_WHITE);
     }
 }
+
+void WatchySkykid::drawFire()
+{
+    if (currentTime.Minute == 0) {
+        NTP_SYNC = false;
+#ifndef WATCHY_SIM
+        connectWiFi();
+#endif
+        if (WIFI_CONFIGURED) {
+#ifdef WATCHY_SIM
+            NTP_SYNC = true;
+#else
+            NTP_SYNC = syncNTP();
+#endif
+        }
+    }
+    if (NTP_SYNC) {
+        display.drawBitmap(INDEX_SIZE * 41, INDEX_SIZE * 29, vinus_fire, INDEX_SIZE * 3, INDEX_SIZE * 3, isDaytime ? GxEPD_BLACK : GxEPD_WHITE); //ntp fire
+    }
+#ifndef WATCHY_SIM
+    WiFi.mode(WIFI_OFF);
+    btStop();
+#endif
+}
+
 
 void WatchySkykid::drawDate() {
     display.setTextColor(isDaytime ? GxEPD_BLACK : GxEPD_WHITE);

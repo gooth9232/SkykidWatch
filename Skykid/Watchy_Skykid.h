@@ -18,6 +18,7 @@ class WatchySkykid : public Watchy{
         void drawAirEnemy();
         void drawLandEnemy();
         void drawTarget();
+        void drawFire();
         void drawDate();
         void drawBattery();
         void drawSeg(const int& num, int index_x, int index_y, bool one_left = false);
